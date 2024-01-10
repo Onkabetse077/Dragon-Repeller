@@ -1,6 +1,6 @@
 let xp = 0;
-let health = 200;
-let gold = 100;
+let health = 100;
+let gold = 50;
 let currentWeapon = 0;
 let fighting;
 let monsterHealth;
@@ -21,25 +21,32 @@ const monsterName = document.querySelector("#monsterName");
 const monsterHealthText = document.querySelector("#monsterHealth");
 
 //Objects
-const weapons= [{
+const weapons= [
+  {
   name:"stick",power:5
-},{
+},
+  {
   name: "dagger",power: 30
-},{
+},
+  {
   name: "claw hammer",power: 50
-},{
+},
+  {
   name: "sword",power: 100
 }];
 
-const monsters = [{
+const monsters = [
+  {
  name: "slime",level: 2,health: 15
 },{
   name: "fanged beast",level: 8,health: 60
-},{
+},
+  {
   name: "dragon",level: 20,health: 300
 }];
 
-const locations = [{
+const locations = [
+  {
   name:"town square",
   "button text":["Go to store", "Go to cave","Fight dragon"],
   "button functions":[goStore, goCave,fightDragon],
@@ -49,7 +56,8 @@ const locations = [{
   "button text":["Buy 10 health (10 gold)", "Buy weapon (30 gold)","Go to town square"],
   "button functions":[buyHealth,buyWeapon,goTown],
   text: "You enter the store."
-},{
+},
+  {
    name:"cave",
    "button text":["Fight slime","Fight fanged beast","Go to town square"],
   "button functions":[fightSlime,fightBeast,goTown],
@@ -64,6 +72,18 @@ const locations = [{
     "button text": ["Go to town square", "Go to town square","Go to town square"],
     "button functions": [goTown, goTown, goTown],
     text: 'The monster screams "Arg!" as it dies. You gain experience points and find gold.'
+  },
+  {
+    name: "lose",
+    "button text": ["REPLAY?", "REPLAY?","REPLAY?"],
+    "button functions": [restart, restart, restart],
+    text: 'You die. ☠️'
+  },
+  {
+    name: "win",
+    "button text": ["REPLAY?", "REPLAY?","REPLAY?"],
+    "button functions": [restart, restart, restart],
+    text: 'You defeat the dragon! YOU WIN THE GAME! 🎉'
   }];
 
 const battle = [];
@@ -174,16 +194,25 @@ function attack(){
   text.innerText = "The "+ monsters[fighting].name + " attacks."
 
   text.innerText = " You attack it with your " + weapons[currentWeapon].name + ".";
-  health -=monsters[fighting].level;
+  health -=getMonsterAttackValue(monsters[fighting].level);
   monsterHealth -= weapons[currentWeapon].power + Math.floor(Math.random()* xp) + 1;
 
   healthText.innerText = health;
   monsterHealthText.innerText = monsterHealth
-  if(health >= 0){
+  if(health <= 0) {
     lose();
-  }else if(monsterHealth <= 0){
-    defeatMonster();
   }
+  else if(monsterHealth <= 0) {
+    fighting === 2 ? winGame() : defeatMonster();
+  }
+}
+
+function getMonsterAttackValue(level){
+  const hit = (level * 5) - (Math.floor(Math.random() * xp));
+
+  console.log(hit);
+
+  return hit;
 }
 
 function dodge(){
@@ -200,6 +229,23 @@ function defeatMonster(){
 }
 
 function lose(){
-  update(locations[4]);
+  update(locations[5]);
 }
 
+function winGame(){
+  update(locations[6]);
+}
+
+function restart(){
+  xp  = "0";
+  health  = 100;
+  gold = 50;
+  currentWeapon = 0;
+  inventory = ["stick"];
+
+  xpText.innerText = xp;
+  healthText.innerText = health;
+  goldText.innerText = gold;
+
+  goTown();
+}
