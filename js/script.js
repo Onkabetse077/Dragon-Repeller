@@ -38,7 +38,8 @@ const weapons= [
 const monsters = [
   {
  name: "slime",level: 2,health: 15
-},{
+},
+  {
   name: "fanged beast",level: 8,health: 60
 },
   {
@@ -51,7 +52,8 @@ const locations = [
   "button text":["Go to store", "Go to cave","Fight dragon"],
   "button functions":[goStore, goCave,fightDragon],
   text: "You are in the town square. You see a sign that says \"Store\"."
-},{
+},
+  {
   name:"store",
   "button text":["Buy 10 health (10 gold)", "Buy weapon (30 gold)","Go to town square"],
   "button functions":[buyHealth,buyWeapon,goTown],
@@ -70,7 +72,7 @@ const locations = [
   {
     name: "kill monster",
     "button text": ["Go to town square", "Go to town square","Go to town square"],
-    "button functions": [goTown, goTown, goTown],
+    "button functions": [goTown, goTown, easterEgg],
     text: 'The monster screams "Arg!" as it dies. You gain experience points and find gold.'
   },
   {
@@ -84,6 +86,13 @@ const locations = [
     "button text": ["REPLAY?", "REPLAY?","REPLAY?"],
     "button functions": [restart, restart, restart],
     text: 'You defeat the dragon! YOU WIN THE GAME! 🎉'
+  },
+  {
+    name: "easter egg",
+    "button text": ["2", "8","Go to town square?"],
+    "button functions": [pickTwo, pickEight, goTown],
+    text: 'You find a secret game. Pick a number above. Ten numbers will be randomly chosen between 0 and 10.' +
+      ' If the number you choose matches one of the random numbers, you win!'
   }];
 
 const battle = [];
@@ -199,7 +208,6 @@ function attack(){
     monsterHealth -= weapons[currentWeapon].power + Math.floor(Math.random()* xp) + 1;
   }
   else{
-    attack();
     text.innerText += " You miss.";
   }
 
@@ -212,6 +220,12 @@ function attack(){
   else if(monsterHealth <= 0) {
     fighting === 2 ? winGame() : defeatMonster();
   }
+
+  if(Math.random() <= .1 && inventory.length !== 1){
+  text.innerText += " Your " + inventory.pop() + " breaks."
+
+    currentWeapon --;
+  }
 }
 
 function getMonsterAttackValue(level){
@@ -222,6 +236,9 @@ function getMonsterAttackValue(level){
   return hit > 0 ? hit : 0;
 }
 
+function isMonsterHit(){
+  return Math.random() > .2 || health < 20;
+}
 function dodge(){
   text.innerText = "You dodge the attack from the " + monsters[fighting].name;
 }
@@ -255,4 +272,41 @@ function restart(){
   goldText.innerText = gold;
 
   goTown();
+}
+
+function easterEgg(){
+update(locations[7]);
+}
+
+function pickTwo(guess) {
+pick(2);
+}
+function pickEight(guess) {
+pick(8);
+}
+
+function pick(guess){
+  const numbers = [];
+
+  while (numbers.length < 10){
+    numbers.push(Math.floor(Math.random() * 11));
+  }
+  text.innerText ="You picked "+ guess +". Here are the random numbers:\n";
+  for (let i = 1; i < 10; i++) {
+    text.innerText += numbers[i] + "\n";
+  }
+if(numbers.indexOf(guess) !== -1){
+  text.innerText += "Right! You win 20 gold!"
+  gold += 20;
+  goldText.innerText = gold;
+}
+else{
+  text.innerText += "Wrong! You lose 10 health!";
+  health -= 10;
+  healthText.innerText = health;
+
+  if (health <= 0){
+    lose();
+  }
+}
 }
